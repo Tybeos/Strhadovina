@@ -29,10 +29,36 @@ form or place. All analysis assumes an English plaintext.
   the cipher's percentage difference from the random baseline.
 - `compare.txt` — generated: cipher metrics versus the random baseline average.
 - `solve.py` — imports `statistic.py`, runs the autocorrelation (kappa) test,
-  Shannon entropy, and chi-squared per-column key recovery, then decrypts. Each
-  test is also compared against the `random_oneline.txt` baseline average.
+  Shannon entropy, chi-squared per-column key recovery across the Vigenere,
+  Beaufort and variant Beaufort schemes (then decrypts with the best fit), and a
+  common-English-word match count. Each test is also compared against the
+  `random_oneline.txt` baseline average.
 - `solve.txt` — generated: key-period confirmation, entropy, recovered key, and
   the attempted decryption.
+- `keylength.py` — shows the key-length evidence as one table: autocorrelation,
+  column IoC, and Kasiski side by side per length, each compared to the random
+  baseline (all 1000 lines), plus a harmonic check, with the verdict (period 13).
+- `autocorr.py` — full autocorrelation across every shift, writes
+  `autocorr_full.txt`; multiples of 13 are marked and stay elevated far across
+  the text, confirming the period.
+- `wordlist_attack.py` — dictionary attack on the 13-letter key: tests every
+  13-letter word in `/usr/share/dict/words` (plus themed terms), fixing each as
+  the key and hill-climbing the alphabet, then refines the top candidates.
+  Writes `wordlist_results.txt`.
+- `campaign_attack.py` — standalone, multi-core version of the dictionary attack
+  for running on a more powerful machine. Self-contained (needs only itself,
+  `cipher_oneline.txt`, and `english_quadgrams.txt`). Run:
+  `python3 campaign_attack.py [wordlist]`. Writes `campaign_results.txt`.
+- `hypoteze.py` — scratchpad for testing cipher-cracking ideas. Each hypothesis
+  transforms the text and is scored by IoC, best-scheme chi-squared, and word
+  hits. Grows over time; add a function and register it in `HYPOTHESES`.
+- `anneal.py` — mixed-alphabet Vigenere (Quagmire) breaker: hill-climbs the
+  26-symbol alphabet permutation, solving the period-13 key each step, scored by
+  English quadgrams. Needs `english_quadgrams.txt` (downloaded, gitignored).
+  Verified correct on known plaintext, but the unguided search does not converge
+  from ~700 chars. With a candidate key it is reliable: `python3 anneal.py KEY1
+  KEY2 ...` fixes each 13-letter keyword and hill-climbs only the permutation.
+  A correct key scores ~ -2800 with IoC ~0.066; wrong keys sit near -4800.
 
 `cipher_raw.txt` is the single source of truth. The two `.txt` outputs are
 always regenerated from it and should not be edited by hand.

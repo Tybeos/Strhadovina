@@ -38,14 +38,30 @@ Entropy: 4.6005 bits/char
 Random maximum: 4.7004 bits/char
 Entropy: cipher 4.6005, random 4.6749 (-1.6%)
 
-Chi-squared key recovery
-------------------------
-What it tracks: each column's best English-fitting shift, combined into the key, then decrypted.
+Cipher scheme key recovery
+--------------------------
+What it tracks: tries Vigenere, Beaufort and variant Beaufort; lowest chi-squared wins.
 
 Key length: 13
-Recovered key: EGIXQCEEFAXMX
-Decrypted chi-squared: cipher 733.4619, random 1053.4159 (-30.4%)
-(lower chi-squared than random means the decryption fits English better)
+(lower chi-squared = fits English better)
 
-Decrypted text:
+Scheme     Key              Chi-squared
+vigenere   EGIXQCEEFAXMX      733.46
+variant    WUSDKYWWVADOD      733.46
+beaufort   CEOWPIEEPWPBW      772.76
+Random baseline chi-squared (avg): 1053.42
+
+Best scheme: vigenere (key EGIXQCEEFAXMX, chi-squared 733.46)
+Decrypted text (best scheme):
 WVUGLBAWAGHVGEDSNVCCIIOFDTNXKETRWLEOXWYEFDFDNMSFRXLSMXKSUSHWHCWBFRVKTFCLYFRNERDJYBNAHWHEAVUKKBBRALFTFYAOOVKTOCUEHGHKOEASRXNMVHNWRPUMDFNGHDAIMLMAAORSKVODERGUNYBKRFUORRLLBSNBRJCFXRPMRRGMYNTMHMCYLLRBRNUCITTARNDRDMNDILVLHRBLNKYHOXRPIVUEPBWUHROCHMJOAEPUFDFRGNNEWHXKSSUNIUOECRWXFRCORJMPEVRBLGESCKNDHWHSFDTGFENIUOUHIGRNKFDFONTLFOLWBEABFCCTOALRAKKMMFKSOFDHHOFACOPFUVAHRWBORAGSRIMRHIFAVKNSYKTOLHEKDFAACHLCPTCRPDFAFENISMNDUQAVSNUOKNMNWPSPJLYBVRVAIEVSBPNXYGBIZIIOFOUEKNSSONUSVYDRKSAIBFTXNIUSVIBNAHDHOVCLZOHMOCFKEYKCHTOYPGOTLONGLFIWQRDPDBOADWYRFZRDRNLNHTQFJEFNCNYVINGSDPHOWAKOTNOGPUNSERIRXKFIEMSHVTCAZHJULZJVVAHUEOYXGGSKBMHGGFRZQESKVRPOTUKHHENZRMGQDLGMQWQKUJMNISTIJBHYSMCRDYCPUNELWIVHHKVBPEAGANHHGLVCWLGTESIKCPSGUVO
+
+English word matches
+--------------------
+What it tracks: common English words appearing in the decryption; more than random means real text.
+
+Word list size: 92 common English words
+Hits in decryption: 2
+Hits in random (avg): 1.38
+Word hits: cipher 2.0000, random 1.3800 (+44.9%)
+
+Words found in decryption: HOW (1), NEW (1)
