@@ -2,36 +2,102 @@ Cipher statistics
 =================
 Total characters: 703
 Unique characters: 26
-Index of coincidence: 0.0422
+Index of coincidence: 0.0422 (English 0.0667, random 0.0385)
 
-Letter   Count   Percentage
+Character frequencies
+---------------------
+Char     Count   Percentage   Guess
+L        43        6.12%       E
+M        42        5.97%       T
+S        41        5.83%       A
+O        39        5.55%       O
+P        39        5.55%       I
+I        38        5.41%       N
+E        36        5.12%       S
+R        32        4.55%       H
+C        31        4.41%       R
+X        31        4.41%       D
+K        30        4.27%       L
+Y        30        4.27%       C
+H        28        3.98%       U
+A        27        3.84%       M
+D        24        3.41%       W
+J        24        3.41%       F
+V        24        3.41%       G
+Q        21        2.99%       Y
+T        20        2.84%       P
+W        20        2.84%       B
+B        19        2.70%       V
+G        15        2.13%       K
+N        15        2.13%       J
+U        13        1.85%       X
+Z        11        1.56%       Q
+F        10        1.42%       Z
+
+Frequency substitution guess
+----------------------------
+Most frequent character maps to the most frequent English letter.
+
+Decoded text:
+MVRWVWSMZKSUWNFMLESKTJORIYHWAVFPMIFOXNGNEERPIYBLHXDIYWAILXEMTRPJRGVAYGSIRLHLYOUIKCWREMTSDUHOYFCURIFCZGTEAVAYSSCNTKSBENKMOJIYQTJPWTCAERWNEUZNFDFSKBONTQANSOAHHSFUUUCABHNDCBPFOQSFVBIFWOLAKLFOEYUCNDOZDGHALDDZHLIOUAGMCJQITHCDLOSIEJPPTMXVVCMMIOSSEYOODYTCEERUNHHFBSFUBCRLCBANUHPFRGNBOQOPNMHCDWNCLUWZEMTARIYLETLCBACTNWWLOEERSIDILONNCNKFRASDAZEOTUOAXRMXAFNUSMRSNBTGBQSTHPJEGKOIULYGTNRTAOPMGMGAITSUIRSKLSVSPDUHTIRSETLCXYHNXJTABPREMIYHVIIVKISFAUDSTFGIJTHWKWHLWTJORMHNYGINYHCDGGIOOCNZHUDVANHSATUGDDZEAMRNEEEABQGTNRIRSZERGOEFJAHEERXPXDETPWASNBGWRWDEOWJHECYRGVFPLLODTHEAMVSARNUSGHAEIHQINDYOJTFTFTIPADNNBDECISFAUDEMTEOQLLDLCCSLTJOIANBIGOVEDMASDKHWBTWRMITXJTAOCOTLXIDOHCDMBYUHMLQPMGVVCTQTUUUCPLNWYIEEEEAOPITVVNLOKXAWKAA
+
+English comparison (character vs English letter frequency)
+----------------------------------------------------------
+Char     Guess   Observed   English   Difference
+A        M          3.84%    8.17%    -4.33
+B        V          2.70%    1.29%    +1.41
+C        R          4.41%    2.78%    +1.63
+D        W          3.41%    4.25%    -0.84
+E        S          5.12%   12.70%    -7.58
+F        Z          1.42%    2.23%    -0.81
+G        K          2.13%    2.02%    +0.11
+H        U          3.98%    6.09%    -2.11
+I        N          5.41%    6.97%    -1.56
+J        F          3.41%    0.15%    +3.26
+K        L          4.27%    0.77%    +3.50
+L        E          6.12%    4.03%    +2.09
+M        T          5.97%    2.41%    +3.56
+N        J          2.13%    6.75%    -4.62
+O        O          5.55%    7.51%    -1.96
+P        I          5.55%    1.93%    +3.62
+Q        Y          2.99%    0.10%    +2.89
+R        H          4.55%    5.99%    -1.44
+S        A          5.83%    6.33%    -0.50
+T        P          2.84%    9.06%    -6.22
+U        X          1.85%    2.76%    -0.91
+V        G          3.41%    0.98%    +2.43
+W        B          2.84%    2.36%    +0.48
+X        D          4.41%    0.15%    +4.26
+Y        C          4.27%    1.97%    +2.30
+Z        Q          1.56%    0.07%    +1.49
+
+Common bigrams and trigrams
 ---------------------------
-L        43        6.12%
-M        42        5.97%
-S        41        5.83%
-O        39        5.55%
-P        39        5.55%
-I        38        5.41%
-E        36        5.12%
-R        32        4.55%
-C        31        4.41%
-X        31        4.41%
-K        30        4.27%
-Y        30        4.27%
-H        28        3.98%
-A        27        3.84%
-D        24        3.41%
-J        24        3.41%
-V        24        3.41%
-Q        21        2.99%
-T        20        2.84%
-W        20        2.84%
-B        19        2.70%
-G        15        2.13%
-N        15        2.13%
-U        13        1.85%
-Z        11        1.56%
-F        10        1.42%
+Bigrams:  LL (9), PQ (6), LC (6), LA (5), LS (5), EJ (5), KO (5), IW (5), CE (5), MN (4)
+Trigrams: LLC (4), LAM (4), RYX (4), MNO (3), PCE (3), LLL (3), NOC (2), CPQ (2), PQR (2), BJT (2)
 
-Most frequent: L (43x)
-Least frequent: F (10x)
+Key length estimation
+---------------------
+Kasiski votes: 2 (15), 3 (14), 13 (14), 5 (9), 4 (8)
+
+Length   Avg column IoC
+1        0.0422
+2        0.0420
+3        0.0425
+4        0.0428
+5        0.0420
+6        0.0423
+7        0.0417
+8        0.0433
+9        0.0428
+10       0.0416
+11       0.0439
+12       0.0440
+13       0.0501
+14       0.0427
+15       0.0421
+16       0.0449
+17       0.0391
+18       0.0403
+19       0.0409
+20       0.0412
