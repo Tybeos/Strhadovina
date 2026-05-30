@@ -49,6 +49,15 @@ form or place. All analysis assumes an English plaintext.
   for running on a more powerful machine. Self-contained (needs only itself,
   `cipher_oneline.txt`, and `english_quadgrams.txt`). Run:
   `python3 campaign_attack.py [wordlist]`. Writes `campaign_results.txt`.
+- `strahd_offline.py` — one-file offline multi-core cracker with the cipher and
+  ~15k 13-letter keys (Strahd terms + all dictionary words) embedded; needs only
+  `english_quadgrams.txt`. Console output only. `python3 strahd_offline.py` to
+  crack, or `python3 strahd_offline.py KEYWORD` to test one key.
+- `bruteforce.py` — runs the key brute force from text wordlists in order
+  (`strahd_combos.txt` then `english_13.txt`), logging every score live to
+  `bruteforce_results.txt` and writing a ranked summary to
+  `bruteforce_ranked.txt`. Made to just Run in an IDE.
+- `strahd_combos.txt` / `english_13.txt` — the two wordlists it reads.
 - `hypoteze.py` — scratchpad for testing cipher-cracking ideas. Each hypothesis
   transforms the text and is scored by IoC, best-scheme chi-squared, and word
   hits. Grows over time; add a function and register it in `HYPOTHESES`.
