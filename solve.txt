@@ -1,0 +1,51 @@
+Vigenere solver
+===============
+
+Autocorrelation (kappa) test
+----------------------------
+What it tracks: how often the text matches itself when shifted; peaks reveal the key period.
+
+Offset   Coincidence
+1        0.0499
+2        0.0371
+3        0.0371
+4        0.0529
+5        0.0415
+6        0.0359
+7        0.0388
+8        0.0446
+9        0.0403
+10       0.0289
+11       0.0347
+12       0.0362
+13       0.0580  <- peak
+14       0.0377
+15       0.0407
+16       0.0495
+17       0.0452
+18       0.0467
+19       0.0497
+20       0.0278
+
+Strongest period: 13 (coincidence 0.0580)
+Peak coincidence: cipher 0.0580, random 0.0529 (+9.7%)
+
+Shannon entropy
+---------------
+What it tracks: information per character; lower than random means more structure.
+
+Entropy: 4.6005 bits/char
+Random maximum: 4.7004 bits/char
+Entropy: cipher 4.6005, random 4.6749 (-1.6%)
+
+Chi-squared key recovery
+------------------------
+What it tracks: each column's best English-fitting shift, combined into the key, then decrypted.
+
+Key length: 13
+Recovered key: EGIXQCEEFAXMX
+Decrypted chi-squared: cipher 733.4619, random 1053.4159 (-30.4%)
+(lower chi-squared than random means the decryption fits English better)
+
+Decrypted text:
+WVUGLBAWAGHVGEDSNVCCIIOFDTNXKETRWLEOXWYEFDFDNMSFRXLSMXKSUSHWHCWBFRVKTFCLYFRNERDJYBNAHWHEAVUKKBBRALFTFYAOOVKTOCUEHGHKOEASRXNMVHNWRPUMDFNGHDAIMLMAAORSKVODERGUNYBKRFUORRLLBSNBRJCFXRPMRRGMYNTMHMCYLLRBRNUCITTARNDRDMNDILVLHRBLNKYHOXRPIVUEPBWUHROCHMJOAEPUFDFRGNNEWHXKSSUNIUOECRWXFRCORJMPEVRBLGESCKNDHWHSFDTGFENIUOUHIGRNKFDFONTLFOLWBEABFCCTOALRAKKMMFKSOFDHHOFACOPFUVAHRWBORAGSRIMRHIFAVKNSYKTOLHEKDFAACHLCPTCRPDFAFENISMNDUQAVSNUOKNMNWPSPJLYBVRVAIEVSBPNXYGBIZIIOFOUEKNSSONUSVYDRKSAIBFTXNIUSVIBNAHDHOVCLZOHMOCFKEYKCHTOYPGOTLONGLFIWQRDPDBOADWYRFZRDRNLNHTQFJEFNCNYVINGSDPHOWAKOTNOGPUNSERIRXKFIEMSHVTCAZHJULZJVVAHUEOYXGGSKBMHGGFRZQESKVRPOTUKHHENZRMGQDLGMQWQKUJMNISTIJBHYSMCRDYCPUNELWIVHHKVBPEAGANHHGLVCWLGTESIKCPSGUVO

@@ -1,0 +1,14 @@
+Cipher vs random baseline
+=========================
+What it tracks: the same statistics measured on many purely random samples, so structure that beats random stands out.
+
+Random samples: 1000
+Characters per sample: 703
+
+Metric                  Cipher    Random avg   Difference
+Index of coincidence     0.0422      0.0384      +9.6%
+Unique characters       26.0000     26.0000      +0.0%
+Top character %          6.1166      5.3664     +14.0%
+Max bigram count         9.0000      5.4430     +65.3%
+Max trigram count        4.0000      2.1490     +86.1%
+Best key-length IoC      0.0501      0.0408     +22.7%

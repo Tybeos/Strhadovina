@@ -1,11 +1,15 @@
 Cipher statistics
 =================
+What it tracks: overall size and randomness of the cipher; IoC near English suggests transposition, near random suggests polyalphabetic.
+
 Total characters: 703
 Unique characters: 26
 Index of coincidence: 0.0422 (English 0.0667, random 0.0385)
 
 Character frequencies
 ---------------------
+What it tracks: how often each character occurs, with a frequency-rank substitution guess.
+
 Char     Count   Percentage   Guess
 L        43        6.12%       E
 M        42        5.97%       T
@@ -36,13 +40,15 @@ F        10        1.42%       Z
 
 Frequency substitution guess
 ----------------------------
-Most frequent character maps to the most frequent English letter.
+What it tracks: the plaintext if each character maps to the English letter of equal rank.
 
 Decoded text:
 MVRWVWSMZKSUWNFMLESKTJORIYHWAVFPMIFOXNGNEERPIYBLHXDIYWAILXEMTRPJRGVAYGSIRLHLYOUIKCWREMTSDUHOYFCURIFCZGTEAVAYSSCNTKSBENKMOJIYQTJPWTCAERWNEUZNFDFSKBONTQANSOAHHSFUUUCABHNDCBPFOQSFVBIFWOLAKLFOEYUCNDOZDGHALDDZHLIOUAGMCJQITHCDLOSIEJPPTMXVVCMMIOSSEYOODYTCEERUNHHFBSFUBCRLCBANUHPFRGNBOQOPNMHCDWNCLUWZEMTARIYLETLCBACTNWWLOEERSIDILONNCNKFRASDAZEOTUOAXRMXAFNUSMRSNBTGBQSTHPJEGKOIULYGTNRTAOPMGMGAITSUIRSKLSVSPDUHTIRSETLCXYHNXJTABPREMIYHVIIVKISFAUDSTFGIJTHWKWHLWTJORMHNYGINYHCDGGIOOCNZHUDVANHSATUGDDZEAMRNEEEABQGTNRIRSZERGOEFJAHEERXPXDETPWASNBGWRWDEOWJHECYRGVFPLLODTHEAMVSARNUSGHAEIHQINDYOJTFTFTIPADNNBDECISFAUDEMTEOQLLDLCCSLTJOIANBIGOVEDMASDKHWBTWRMITXJTAOCOTLXIDOHCDMBYUHMLQPMGVVCTQTUUUCPLNWYIEEEEAOPITVVNLOKXAWKAA
 
-English comparison (character vs English letter frequency)
-----------------------------------------------------------
+English comparison
+------------------
+What it tracks: each character's frequency next to the expected English letter frequency.
+
 Char     Guess   Observed   English   Difference
 A        M          3.84%    8.17%    -4.33
 B        V          2.70%    1.29%    +1.41
@@ -73,11 +79,15 @@ Z        Q          1.56%    0.07%    +1.49
 
 Common bigrams and trigrams
 ---------------------------
+What it tracks: the most frequent adjacent character pairs and triples (repeated structure).
+
 Bigrams:  LL (9), PQ (6), LC (6), LA (5), LS (5), EJ (5), KO (5), IW (5), CE (5), MN (4)
 Trigrams: LLC (4), LAM (4), RYX (4), MNO (3), PCE (3), LLL (3), NOC (2), CPQ (2), PQR (2), BJT (2)
 
 Key length estimation
 ---------------------
+What it tracks: Kasiski spacings and per-column IoC that hint at the Vigenere key length.
+
 Kasiski votes: 2 (15), 3 (14), 13 (14), 5 (9), 4 (8)
 
 Length   Avg column IoC

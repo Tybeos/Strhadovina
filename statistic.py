@@ -134,62 +134,72 @@ def key_length_iocs(text, max_length=20):
     return [(k, average_column_ioc(text, k)) for k in range(1, max_length + 1)]
 
 
+def titled_section(title, info, body):
+    """Builds a section with a title, underline and a one-line description."""
+    return [title, "-" * len(title), f"What it tracks: {info}", ""] + body
+
+
 def frequency_section(text):
     """Formats the character frequency table with the substitution guess."""
     mapping = frequency_substitution(text)
-    lines = ["Character frequencies", "---------------------",
-             "Char     Count   Percentage   Guess"]
+    body = ["Char     Count   Percentage   Guess"]
     for character, count, percentage in character_frequencies(text):
         guess = mapping.get(character, "?")
-        lines.append(f"{character:<8} {count:<7} {percentage:6.2f}%       {guess}")
-    return lines
+        body.append(f"{character:<8} {count:<7} {percentage:6.2f}%       {guess}")
+    return titled_section(
+        "Character frequencies",
+        "how often each character occurs, with a frequency-rank substitution guess.",
+        body)
 
 
 def substitution_section(text):
     """Formats the frequency-based substitution guess and decoded text."""
     decoded = apply_substitution(text, frequency_substitution(text))
-    return ["Frequency substitution guess",
-            "----------------------------",
-            "Most frequent character maps to the most frequent English letter.",
-            "",
-            "Decoded text:",
-            decoded]
+    return titled_section(
+        "Frequency substitution guess",
+        "the plaintext if each character maps to the English letter of equal rank.",
+        ["Decoded text:", decoded])
 
 
 def english_section(text):
     """Formats the observed-versus-English comparison table with the guess."""
     mapping = frequency_substitution(text)
-    lines = ["English comparison (character vs English letter frequency)",
-             "----------------------------------------------------------",
-             "Char     Guess   Observed   English   Difference"]
+    body = ["Char     Guess   Observed   English   Difference"]
     for character, observed, expected, difference in english_comparison(text):
         guess = mapping.get(character, "?")
-        lines.append(f"{character:<8} {guess:<7} {observed:7.2f}%  {expected:6.2f}%   {difference:+6.2f}")
-    return lines
+        body.append(f"{character:<8} {guess:<7} {observed:7.2f}%  {expected:6.2f}%   {difference:+6.2f}")
+    return titled_section(
+        "English comparison",
+        "each character's frequency next to the expected English letter frequency.",
+        body)
 
 
 def ngram_section(text):
     """Formats the most common bigrams and trigrams."""
-    lines = ["Common bigrams and trigrams", "---------------------------"]
-    lines.append("Bigrams:  " + ", ".join(
-        f"{gram} ({count})" for gram, count in most_common_ngrams(text, 2)))
-    lines.append("Trigrams: " + ", ".join(
-        f"{gram} ({count})" for gram, count in most_common_ngrams(text, 3)))
-    return lines
+    body = ["Bigrams:  " + ", ".join(
+                f"{gram} ({count})" for gram, count in most_common_ngrams(text, 2)),
+            "Trigrams: " + ", ".join(
+                f"{gram} ({count})" for gram, count in most_common_ngrams(text, 3))]
+    return titled_section(
+        "Common bigrams and trigrams",
+        "the most frequent adjacent character pairs and triples (repeated structure).",
+        body)
 
 
 def key_length_section(text):
     """Formats the Kasiski and per-column key-length estimates."""
-    lines = ["Key length estimation", "---------------------"]
     kasiski = likely_key_lengths(text)
-    lines.append("Kasiski votes: " + (", ".join(
-        f"{length} ({votes})" for length, votes in kasiski) or "none"))
-    lines.append("")
-    lines.append("Length   Avg column IoC")
+    body = ["Kasiski votes: " + (", ".join(
+                f"{length} ({votes})" for length, votes in kasiski) or "none"),
+            "",
+            "Length   Avg column IoC"]
     for length, ioc in key_length_iocs(text):
         marker = "  <- near English" if ioc >= ENGLISH_IOC * 0.9 else ""
-        lines.append(f"{length:<8} {ioc:.4f}{marker}")
-    return lines
+        body.append(f"{length:<8} {ioc:.4f}{marker}")
+    return titled_section(
+        "Key length estimation",
+        "Kasiski spacings and per-column IoC that hint at the Vigenere key length.",
+        body)
 
 
 def build_report(text):
@@ -198,6 +208,9 @@ def build_report(text):
     counts = character_counts(text)
 
     lines = ["Cipher statistics", "================="]
+    lines.append("What it tracks: overall size and randomness of the cipher; "
+                 "IoC near English suggests transposition, near random suggests polyalphabetic.")
+    lines.append("")
     lines.append(f"Total characters: {len(text)}")
     lines.append(f"Unique characters: {len(counts)}")
     lines.append(f"Index of coincidence: {ioc:.4f} "
@@ -208,7 +221,7 @@ def build_report(text):
         lines.append("")
         lines.extend(section(text))
 
-    return "\n".join(linres) + "\n"
+    return "\n".join(lines) + "\n"
 
 
 def main():
