@@ -220,6 +220,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-
-# Downloaded English quadgram table for anneal.py
-english_quadgrams.txt
