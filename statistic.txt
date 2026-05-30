@@ -1,0 +1,37 @@
+Cipher statistics
+=================
+Total characters: 703
+Unique characters: 26
+Index of coincidence: 0.0422
+
+Letter   Count   Percentage
+---------------------------
+L        43        6.12%
+M        42        5.97%
+S        41        5.83%
+O        39        5.55%
+P        39        5.55%
+I        38        5.41%
+E        36        5.12%
+R        32        4.55%
+C        31        4.41%
+X        31        4.41%
+K        30        4.27%
+Y        30        4.27%
+H        28        3.98%
+A        27        3.84%
+D        24        3.41%
+J        24        3.41%
+V        24        3.41%
+Q        21        2.99%
+T        20        2.84%
+W        20        2.84%
+B        19        2.70%
+G        15        2.13%
+N        15        2.13%
+U        13        1.85%
+Z        11        1.56%
+F        10        1.42%
+
+Most frequent: L (43x)
+Least frequent: F (10x)
