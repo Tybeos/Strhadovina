@@ -58,6 +58,14 @@ form or place. All analysis assumes an English plaintext.
   `bruteforce_results.txt` and writing a ranked summary to
   `bruteforce_ranked.txt`. Made to just Run in an IDE.
 - `strahd_combos.txt` / `english_13.txt` — the two wordlists it reads.
+- `key_tester.py` — small tkinter window app: type a 13-letter key, press Enter,
+  and it hill-climbs the alphabet and shows the score and decrypted text. For
+  trying keys by hand without the command line.
+- `quagmire_solver/` — self-contained folder (with its own copies of
+  `cipher_oneline.txt` and `english_quadgrams.txt`) holding `quagmire3.py`, the
+  full Quagmire III/IV breaker that solves TWO scrambled alphabets plus the
+  shifts. `python3 quagmire3.py KEYWORD` fixes a keyword and finds the alphabets;
+  no-arg runs a blind search; `--selftest` validates on known plaintext (100%).
 - `hypoteze.py` — scratchpad for testing cipher-cracking ideas. Each hypothesis
   transforms the text and is scored by IoC, best-scheme chi-squared, and word
   hits. Grows over time; add a function and register it in `HYPOTHESES`.
