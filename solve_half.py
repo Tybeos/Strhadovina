@@ -9,12 +9,17 @@ The substitution is solved smartly: a frequency seed places E on the most common
 mid symbol, T on the next, and so on (ENGLISH_ORDER), and a steepest-ascent
 hill-climb then runs to convergence from several diversified restarts.
 
-It also reports the one measurement a substitution cannot fake: the index of
-coincidence of mid. Because a substitution only relabels letters, IoC is
-invariant under it, so a wrong key (mid scrambled, IoC ~0.038) cannot be dressed
-up to look English, while the right key makes mid a substituted English text
-(IoC ~0.066). Results are ranked by IoC first, then by real English word count,
-so the honest signal leads. Runs on all CPU cores.
+Candidates are judged by statistical analysis against English, not by hunting
+for English words (which a hill-climb can fake on nonsense). Two measures are
+reported per key:
+  - IoC of mid: a substitution only relabels letters, so IoC is invariant under
+    it. A wrong key (mid scrambled, IoC ~0.038) therefore cannot be dressed up to
+    look English, while the right key makes mid a substituted English text (IoC
+    ~0.066). This is the honest signal and the primary ranking key.
+  - chi-squared of the decoded text's letter frequencies versus English
+    (statistic.ENGLISH_FREQUENCIES): low means the distribution matches English.
+Results are ranked by IoC first, then by lowest chi-squared, so the key whose
+statistics most match English floats to the top. Runs on all CPU cores.
 
 Needs cipher_oneline.txt, english_quadgrams.txt, strahd_combos.txt and
 english_13.txt in the same folder. Run: python3 solve_half.py
@@ -30,6 +35,8 @@ from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
+from statistic import ENGLISH_FREQUENCIES
+
 HERE = Path(__file__).resolve().parent
 CIPHER = HERE / "cipher_oneline.txt"
 QUADS = HERE / "english_quadgrams.txt"
@@ -40,10 +47,9 @@ RANKED = HERE / "solve_half_ranked.txt"
 KEY_LENGTH = 13
 SUB_RESTARTS = 5
 ENGLISH_ORDER = "ETAOINSHRDLCUMWFGYPBVKJXQZ"
-PROMISING_WORDS = 15
 PROMISING_IOC = 0.058
 
-COMMON_WORDS = (
+DISPLAY_WORDS = (
     "THE AND THAT HAVE FOR NOT WITH YOU THIS BUT HIS FROM THEY SAY HER SHE WILL "
     "ONE ALL WOULD THERE THEIR WHAT OUT ABOUT WHO GET WHICH WHEN MAKE CAN LIKE "
     "TIME JUST HIM KNOW TAKE INTO YEAR YOUR GOOD SOME COULD THEM SEE OTHER THAN "
@@ -73,14 +79,24 @@ def quad(text, lp, fl):
     return sum(lp.get(text[i:i + 4], fl) for i in range(len(text) - 3))
 
 
-def word_hits(text):
-    return sum(text.count(w) for w in COMMON_WORDS)
+def english_chi_squared(text):
+    """Chi-squared of the text's letter frequencies versus English; low is best."""
+    total = len(text)
+    if total == 0:
+        return float("inf")
+    counts = Counter(text)
+    score = 0.0
+    for letter, percent in ENGLISH_FREQUENCIES.items():
+        expected = percent / 100 * total
+        observed = counts.get(letter, 0)
+        score += (observed - expected) ** 2 / expected
+    return score
 
 
 def highlight_words(text):
-    """Wraps every common English word found in the text in red for the console."""
+    """Wraps recognizable English words in red for the console (display only)."""
     spans = []
-    for word in COMMON_WORDS:
+    for word in DISPLAY_WORDS:
         start = text.find(word)
         while start != -1:
             spans.append((start, start + len(word)))
@@ -181,7 +197,7 @@ def process_keyword(keyword):
            for i in range(len(WORKER_MID_BASE))]
     ioc = index_of_coincidence(mid)
     score, text = solve_substitution(mid, WORKER_LP, WORKER_FL)
-    return ioc, word_hits(text), score, keyword, text
+    return ioc, english_chi_squared(text), score, keyword, text
 
 
 def main():
@@ -189,43 +205,44 @@ def main():
     words = load_words()
     cores = os.cpu_count() or 4
     print(f"Substituting EVERY key ({len(words)}) on the first half, {cores} cores. "
-          f"Real English has many word hits.")
+          f"Judged by statistics: high IoC and low chi-squared mean English.")
+
+    by_english = lambda r: (round(r[0], 4), -r[1])
 
     results = []
     start = time.time()
     with LIVE_LOG.open("w", encoding="utf-8") as log, \
             ProcessPoolExecutor(max_workers=cores, initializer=init_worker) as pool:
-        log.write("ioc\twords\tscore\tkey\ttext\n")
-        for i, (ioc, hits, score, key, text) in enumerate(
+        log.write("ioc\tchi2\tscore\tkey\ttext\n")
+        for i, (ioc, chi2, score, key, text) in enumerate(
                 pool.map(process_keyword, words, chunksize=4), 1):
-            results.append((ioc, hits, score, key, text))
-            log.write(f"{ioc:.4f}\t{hits}\t{score:.0f}\t{key}\t{text}\n")
+            results.append((ioc, chi2, score, key, text))
+            log.write(f"{ioc:.4f}\t{chi2:.1f}\t{score:.0f}\t{key}\t{text}\n")
             log.flush()
-            if ioc >= PROMISING_IOC or hits >= PROMISING_WORDS:
-                print(f"  *** {key}: IoC {ioc:.4f}, {hits} words, score {score:.0f}")
+            if ioc >= PROMISING_IOC:
+                print(f"  *** {key}: IoC {ioc:.4f}, chi2 {chi2:.1f}, score {score:.0f}")
                 print(f"      {highlight_words(text)}")
             if i % 200 == 0:
                 rate = i / (time.time() - start)
-                best = max(results)
+                best = max(results, key=by_english)
                 print(f"  {i}/{len(words)}  best IoC {best[0]:.4f} ({best[3]}, "
-                      f"{best[1]} words)  [{rate:.1f}/s, "
+                      f"chi2 {best[1]:.1f})  [{rate:.1f}/s, "
                       f"~{(len(words) - i) / rate / 60:.0f} min left]")
 
-    results.sort(reverse=True)
+    results.sort(key=by_english, reverse=True)
     lines = ["Solved every key, ranked by IoC (invariant, cannot be faked) "
-             "then real English words", ""]
-    for ioc, hits, score, key, text in results[:50]:
-        lines.append(f"{key}  IoC={ioc:.4f}  words={hits}  score={score:.0f}")
+             "then lowest chi-squared versus English letter frequencies", ""]
+    for ioc, chi2, score, key, text in results[:50]:
+        lines.append(f"{key}  IoC={ioc:.4f}  chi2={chi2:.1f}  score={score:.0f}")
         lines.append(f"   {text}")
         lines.append("")
     RANKED.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     best = results[0]
-    print(f"\nBest by IoC: {best[3]}  IoC={best[0]:.4f}  words={best[1]}  "
+    print(f"\nBest by IoC: {best[3]}  IoC={best[0]:.4f}  chi2={best[1]:.1f}  "
           f"score={best[2]:.0f}")
     print(highlight_words(best[4]))
-    print(">>> high IoC and reads as English!"
-          if best[0] >= PROMISING_IOC and best[1] >= PROMISING_WORDS else
+    print(">>> high IoC: statistics match English!" if best[0] >= PROMISING_IOC else
           ">>> no key reaches English IoC; key not found in these lists.")
     print(f"(ranked -> {RANKED.name})")
 
