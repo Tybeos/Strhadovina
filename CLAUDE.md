@@ -61,6 +61,14 @@ form or place. All analysis assumes an English plaintext.
 - `key_tester.py` — small tkinter window app: type a 13-letter key, press Enter,
   and it hill-climbs the alphabet and shows the score and decrypted text. For
   trying keys by hand without the command line.
+- `solver.py` — single-file key solver in shift-then-substitute order. Stage 1
+  ranks keywords by a fast, overfit-proof IoC filter (subtract key, measure IoC);
+  stage 2 solves the substitution for the top keywords with quadgrams. Verified
+  on a self-test (100%). The best key found is IoC 0.0477 — no key reaches
+  English (~0.066), so the cipher is not a clean substitution+Vigenere of English.
+- `repair.py` — transcription-integrity check: tries deleting/inserting one
+  symbol at each position and reports which edit most raises the period-13 column
+  IoC. One edit only reaches ~0.055 (not 0.066), so a single slip is not the fix.
 - `quagmire_solver/` — self-contained folder (with its own copies of
   `cipher_oneline.txt` and `english_quadgrams.txt`) holding `quagmire3.py`, the
   full Quagmire III/IV breaker that solves TWO scrambled alphabets plus the
