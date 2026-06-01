@@ -1,11 +1,20 @@
 """Solves the substitution for EVERY keyword on the first half of the cipher.
 
 Uses the first half of cipher_oneline.txt. For every 13-letter keyword
-(strahd_combos.txt then english_13.txt) it subtracts the key, then fully solves
-the substitution alphabet with English quadgrams (no shortcut filter, so nothing
-is skipped). Each decrypted text is scored by how many real English words it
-contains; results are written live and ranked by word count, so genuine English
-floats to the top. Runs on all CPU cores.
+(strahd_combos.txt then english_13.txt) it subtracts the key to get mid, then
+solves the substitution alphabet with English quadgrams (no shortcut filter, so
+nothing is skipped).
+
+The substitution is solved smartly: a frequency seed places E on the most common
+mid symbol, T on the next, and so on (ENGLISH_ORDER), and a steepest-ascent
+hill-climb then runs to convergence from several diversified restarts.
+
+It also reports the one measurement a substitution cannot fake: the index of
+coincidence of mid. Because a substitution only relabels letters, IoC is
+invariant under it, so a wrong key (mid scrambled, IoC ~0.038) cannot be dressed
+up to look English, while the right key makes mid a substituted English text
+(IoC ~0.066). Results are ranked by IoC first, then by real English word count,
+so the honest signal leads. Runs on all CPU cores.
 
 Needs cipher_oneline.txt, english_quadgrams.txt, strahd_combos.txt and
 english_13.txt in the same folder. Run: python3 solve_half.py
@@ -29,10 +38,10 @@ LIVE_LOG = HERE / "solve_half_results.txt"
 RANKED = HERE / "solve_half_ranked.txt"
 
 KEY_LENGTH = 13
-SUB_RESTARTS = 8
-SUB_ITERS = 4000
+SUB_RESTARTS = 5
 ENGLISH_ORDER = "ETAOINSHRDLCUMWFGYPBVKJXQZ"
 PROMISING_WORDS = 15
+PROMISING_IOC = 0.058
 
 COMMON_WORDS = (
     "THE AND THAT HAVE FOR NOT WITH YOU THIS BUT HIS FROM THEY SAY HER SHE WILL "
@@ -68,28 +77,83 @@ def word_hits(text):
     return sum(text.count(w) for w in COMMON_WORDS)
 
 
+def highlight_words(text):
+    """Wraps every common English word found in the text in red for the console."""
+    spans = []
+    for word in COMMON_WORDS:
+        start = text.find(word)
+        while start != -1:
+            spans.append((start, start + len(word)))
+            start = text.find(word, start + 1)
+    if not spans:
+        return text
+    spans.sort()
+    merged = [list(spans[0])]
+    for lo, hi in spans[1:]:
+        if lo <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], hi)
+        else:
+            merged.append([lo, hi])
+    out, pos = [], 0
+    for lo, hi in merged:
+        out.append(text[pos:lo])
+        out.append(f"\033[31m{text[lo:hi]}\033[0m")
+        pos = hi
+    out.append(text[pos:])
+    return "".join(out)
+
+
+def index_of_coincidence(values):
+    """Returns the index of coincidence of a sequence of numbers."""
+    total = len(values)
+    if total < 2:
+        return 0.0
+    counts = Counter(values)
+    return sum(n * (n - 1) for n in counts.values()) / (total * (total - 1))
+
+
+def frequency_seed(mid):
+    """Seeds the substitution by putting E on the most common mid symbol, etc."""
+    order = [value for value, _ in Counter(mid).most_common()]
+    order += [value for value in range(26) if value not in order]
+    perm = [0] * 26
+    for rank, value in enumerate(order):
+        perm[value] = ord(ENGLISH_ORDER[rank]) - 65
+    return perm
+
+
+def decode(mid, perm):
+    """Applies a substitution (mid value -> letter) to produce text."""
+    return "".join(chr(perm[v] + 65) for v in mid)
+
+
 def solve_substitution(mid, lp, fl):
+    """Cracks the monoalphabetic substitution of mid by steepest-ascent climbing.
+
+    Each restart starts from the frequency seed (E on the most common symbol) and
+    sweeps every symbol pair, keeping a swap only if it raises the quadgram score,
+    repeating until a full sweep finds no improvement. Later restarts shuffle the
+    seed so the search escapes the seed's basin.
+    """
     best_text, best_score = None, None
-    for seed in range(SUB_RESTARTS):
-        rng = random.Random(seed)
-        perm = list(range(26))
-        order = [v for v, _ in Counter(mid).most_common()]
-        order += [v for v in range(26) if v not in order]
-        for i, v in enumerate(order):
-            perm[v] = ord(ENGLISH_ORDER[i]) - 65
-        text = "".join(chr(perm[v] + 65) for v in mid)
-        score = quad(text, lp, fl)
-        for _ in range(SUB_ITERS):
-            a, b = rng.randrange(26), rng.randrange(26)
-            perm[a], perm[b] = perm[b], perm[a]
-            cand = "".join(chr(perm[v] + 65) for v in mid)
-            s = quad(cand, lp, fl)
-            if s > score:
-                score, text = s, cand
-            else:
-                perm[a], perm[b] = perm[b], perm[a]
+    for restart in range(SUB_RESTARTS):
+        perm = frequency_seed(mid)
+        if restart:
+            random.Random(restart).shuffle(perm)
+        score = quad(decode(mid, perm), lp, fl)
+        improved = True
+        while improved:
+            improved = False
+            for a in range(25):
+                for b in range(a + 1, 26):
+                    perm[a], perm[b] = perm[b], perm[a]
+                    s = quad(decode(mid, perm), lp, fl)
+                    if s > score:
+                        score, improved = s, True
+                    else:
+                        perm[a], perm[b] = perm[b], perm[a]
         if best_score is None or score > best_score:
-            best_score, best_text = score, text
+            best_score, best_text = score, decode(mid, perm)
     return best_score, best_text
 
 
@@ -115,8 +179,9 @@ def process_keyword(keyword):
     key = [ord(c) - 65 for c in keyword]
     mid = [(WORKER_MID_BASE[i] - key[i % KEY_LENGTH]) % 26
            for i in range(len(WORKER_MID_BASE))]
+    ioc = index_of_coincidence(mid)
     score, text = solve_substitution(mid, WORKER_LP, WORKER_FL)
-    return word_hits(text), score, keyword, text
+    return ioc, word_hits(text), score, keyword, text
 
 
 def main():
@@ -130,34 +195,38 @@ def main():
     start = time.time()
     with LIVE_LOG.open("w", encoding="utf-8") as log, \
             ProcessPoolExecutor(max_workers=cores, initializer=init_worker) as pool:
-        log.write("words\tscore\tkey\ttext\n")
-        for i, (hits, score, key, text) in enumerate(
+        log.write("ioc\twords\tscore\tkey\ttext\n")
+        for i, (ioc, hits, score, key, text) in enumerate(
                 pool.map(process_keyword, words, chunksize=4), 1):
-            results.append((hits, score, key, text))
-            log.write(f"{hits}\t{score:.0f}\t{key}\t{text}\n")
+            results.append((ioc, hits, score, key, text))
+            log.write(f"{ioc:.4f}\t{hits}\t{score:.0f}\t{key}\t{text}\n")
             log.flush()
-            if hits >= PROMISING_WORDS:
-                print(f"  *** {key}: {hits} words, score {score:.0f}")
-                print(f"      {text}")
+            if ioc >= PROMISING_IOC or hits >= PROMISING_WORDS:
+                print(f"  *** {key}: IoC {ioc:.4f}, {hits} words, score {score:.0f}")
+                print(f"      {highlight_words(text)}")
             if i % 200 == 0:
                 rate = i / (time.time() - start)
-                print(f"  {i}/{len(words)}  best {max(results)[2]} "
-                      f"({max(results)[0]} words)  [{rate:.1f}/s, "
+                best = max(results)
+                print(f"  {i}/{len(words)}  best IoC {best[0]:.4f} ({best[3]}, "
+                      f"{best[1]} words)  [{rate:.1f}/s, "
                       f"~{(len(words) - i) / rate / 60:.0f} min left]")
 
     results.sort(reverse=True)
-    lines = ["Solved every key, ranked by real English words (read the top texts)", ""]
-    for hits, score, key, text in results[:50]:
-        lines.append(f"{key}  words={hits}  score={score:.0f}")
+    lines = ["Solved every key, ranked by IoC (invariant, cannot be faked) "
+             "then real English words", ""]
+    for ioc, hits, score, key, text in results[:50]:
+        lines.append(f"{key}  IoC={ioc:.4f}  words={hits}  score={score:.0f}")
         lines.append(f"   {text}")
         lines.append("")
     RANKED.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     best = results[0]
-    print(f"\nBest by words: {best[2]}  words={best[0]}  score={best[1]:.0f}")
-    print(best[3])
-    print(">>> looks like English!" if best[0] >= PROMISING_WORDS else
-          ">>> nothing reads as English; key not found.")
+    print(f"\nBest by IoC: {best[3]}  IoC={best[0]:.4f}  words={best[1]}  "
+          f"score={best[2]:.0f}")
+    print(highlight_words(best[4]))
+    print(">>> high IoC and reads as English!"
+          if best[0] >= PROMISING_IOC and best[1] >= PROMISING_WORDS else
+          ">>> no key reaches English IoC; key not found in these lists.")
     print(f"(ranked -> {RANKED.name})")
 
 
